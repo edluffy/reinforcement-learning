@@ -1,45 +1,64 @@
 import numpy as np
 
 # A Markov Decision Process: <S, A, P, R, Gamma>
-class GridWorld():
-    def __init__(self):
-        self.states = [[0, 0], [1, 0], [2, 0], [3, 0],
-                       [0, 1], [1, 1], [2, 1], [3, 1],
-                       [0, 2], [1, 2], [2, 2], [3, 2]]
 
-        self.actions = ['U','D','L','R']
+# 'S': set of states with Markov property
+states = ((0, 0), (1, 0), (2, 0), (3, 0),
+          (0, 1), (1, 1), (2, 1), (3, 1),
+          (0, 2), (1, 2), (2, 2), (3, 2))
 
-        self.transition_pr = None # Leave blank if fully deterministic
 
-        self.rewards = [0, 0, 0,  1,
-                        0, 0, 0, -1,
-                        0, 0, 0,  0]
+# ---- Environment ----
 
-        self.gamma = 0.99
+# 'A': set of actions agent can take when in state s
+actions = {}
+for s in states:
+    actions[s] = ['U', 'D', 'L', 'R']
+    if s[1] == 0:
+        actions[s].remove('U')
+    if s[1] == 2:
+        actions[s].remove('D')
+    if s[0] == 0:
+        actions[s].remove('L')
+    if s[0] == 3:
+        actions[s].remove('R')
+    actions[s] = tuple(actions[s])
 
-        self.cstate = self.states[0]
+# 'P': state transition probability matrix
+transitions = None # Leave blank if fully deterministic
 
-    def sample(self, action):
-        if action not in self.actions:
-            print('Unknown action')
+# 'R': gives immediate expected reward from state s
+rewards = {}
+for s in states:
+    if s == (3, 0):
+        rewards[s] = 1
+    if s == (3, 1):
+        rewards[s] = -1
+    else:
+        rewards[s] = 0
 
-        nstate = self.cstate
+# 'Gamma': the discount factor
+gamma = 0.99
 
-        if action == 'U' and nstate[1] > 0:
-            nstate[1] = nstate[1]-1
-        elif action == 'D' and nstate[1] < 2:
-            nstate[1] = nstate[1]+1
-        elif action == 'L' and nstate[0] > 0:
-            nstate[0] = nstate[0]-1
-        elif action == 'R' and nstate[0] < 3:
-            nstate[0] = nstate[0]+1
 
-        obs = nstate
-        reward = self.rewards[self.states.index(nstate)]
-        done = (nstate == [3, 0])
+# ---- Agent ----
 
-        return obs, reward, done
+# A map from state to action
+policy = {}
+for s in states:
+    policy[s] = np.random.choice(actions[s])
 
-env = GridWorld()
+# The initial expected reward from state s
+value = {}
+for s in states:
+    if s == (3, 0) or s == (3, 1):
+        value[s] = 0
+    else:
+        value[s] = -1
 
-print(env.sample('U'))
+for s in states:
+    for a in actions[s]:
+        v = rewards[s] + (gamma * value[s])
+        print(v)
+
+
