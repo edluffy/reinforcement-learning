@@ -7,7 +7,6 @@ states = ((0, 0), (1, 0), (2, 0), (3, 0),
           (0, 1), (1, 1), (2, 1), (3, 1),
           (0, 2), (1, 2), (2, 2), (3, 2))
 
-
 # ---- Environment ----
 
 # 'A': set of actions agent can take when in state s
@@ -66,11 +65,11 @@ value = {}
 for s in states:
     value[s] = 0
 
+
 for _ in range(50):
     for s in states:
+        max_v = -np.inf
         for a in actions[s]:
-            max_v = -10000
-
             if a == 'U':
                 next_state = (s[0], s[1]-1)
             elif a == 'D':
@@ -80,8 +79,7 @@ for _ in range(50):
             elif a == 'R':
                 next_state = (s[0]+1, s[1])
 
-
-            v = rewards[s] + (gamma * value[s])
+            v = rewards[s] + (gamma * value[next_state])
             if v > max_v:
                 max_v = v
                 policy[s] = a
