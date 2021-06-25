@@ -22,6 +22,19 @@ for s in states:
         actions[s].remove('L')
     if s[0] == 3:
         actions[s].remove('R')
+
+    # unpassable block at (1, 1)
+    if s == (0, 1):
+        actions[s].remove('R')
+    if s == (1, 0):
+        actions[s].remove('D')
+    if s == (2, 1):
+        actions[s].remove('L')
+    if s == (1, 2):
+        actions[s].remove('U')
+    if s == (1, 1):
+        actions[s] = []
+
     actions[s] = tuple(actions[s])
 
 # 'P': state transition probability matrix
@@ -40,25 +53,46 @@ for s in states:
 # 'Gamma': the discount factor
 gamma = 0.99
 
-
 # ---- Agent ----
 
 # A map from state to action
 policy = {}
 for s in states:
-    policy[s] = np.random.choice(actions[s])
+    if actions[s]:
+        policy[s] = np.random.choice(actions[s])
 
 # The initial expected reward from state s
 value = {}
 for s in states:
-    if s == (3, 0) or s == (3, 1):
-        value[s] = 0
-    else:
-        value[s] = -1
+    value[s] = 0
 
-for s in states:
-    for a in actions[s]:
-        v = rewards[s] + (gamma * value[s])
-        print(v)
+for _ in range(50):
+    for s in states:
+        for a in actions[s]:
+            max_v = -10000
 
+            if a == 'U':
+                next_state = (s[0], s[1]-1)
+            elif a == 'D':
+                next_state = (s[0], s[1]+1)
+            elif a == 'L':
+                next_state = (s[0]-1, s[1])
+            elif a == 'R':
+                next_state = (s[0]+1, s[1])
+
+
+            v = rewards[s] + (gamma * value[s])
+            if v > max_v:
+                max_v = v
+                policy[s] = a
+
+        value[s] = max_v
+
+    for i, s in enumerate(states):
+        if i % 4 == 0:
+            print('\n-------------------------------')
+        print('%5.2f' % value[s], end=' | ')
+
+    print('\n-------------------------------')
+    print('\n\n\n')
 
