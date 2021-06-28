@@ -1,4 +1,3 @@
-import numpy as np
 # A Markov Decision Process: <S, A, P, R, Gamma>
 
 # 'S': set of states with Markov property
