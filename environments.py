@@ -41,6 +41,9 @@ class GridWorld():
 
                 self.model[(s, a)] = (ns, self.rewards[s])
 
+    def terminal(self, state): # Check if in a terminal state
+        return state == (0, 0) or state == (3, 3)
+
     def display(self, var): # Display a dictionary of values with states as keys
         _type = [type(k) for k in var.values()][0]
         if _type == float or _type == int:
