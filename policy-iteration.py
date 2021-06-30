@@ -2,17 +2,14 @@ import environments
 import random
 
 def policy_iteration(env, gamma=0.9, theta=0.0001):
-    n = 0
-    policy_stable = False
+    argmax = lambda d: max(d, key=d.get)
     value =  {s: 0 for s in env.states}
-    policy = {s: 'R' for s in env.states}
+    policy = {s: random.choice(env.actions) for s in env.states}
+    policy_stable = False
+    n = 0
 
     while not policy_stable:
         n+=1
-        print('Iteration: ', n)
-        env.display(value)
-        env.display(policy)
-
         # Evaluate policy
         while True:
             delta = 0
@@ -25,16 +22,17 @@ def policy_iteration(env, gamma=0.9, theta=0.0001):
                 break
 
         # Improve policy
-        policy_stable = True
         for state in env.states:
             old_action = policy[state]
-            # p(s',r|s,a) = 1
-            action_values = {a: r+gamma*value[ns] for (s, a), (ns, r) in env.model.items() if s == state}
-            policy[state] = max(action_values, key=action_values.get)
+            policy[state] argmax({a: r+gamma*value[ns] for (s, a), (ns, r) in env.model.items() if s == state})
 
-            if old_action != policy[state]:
-                policy_stable = False
+            policy_stable = (old_action == policy[state])
+            if not policy_stable:
                 break
+
+    print('Iterations: ', n)
+    env.display(value)
+    env.display(policy)
 
 env = environments.GridWorld()
 policy_iteration(env)
