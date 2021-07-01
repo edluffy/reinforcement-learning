@@ -1,8 +1,9 @@
 import environments
 import random
 
+argmax = lambda d: max(d, key=d.get)
+
 def policy_iteration(env, gamma=0.9, theta=0.0001):
-    argmax = lambda d: max(d, key=d.get)
     value =  {s: 0 for s in env.states}
     policy = {s: random.choice(env.actions) for s in env.states}
     policy_stable = False
@@ -15,8 +16,9 @@ def policy_iteration(env, gamma=0.9, theta=0.0001):
             delta = 0
             for state in env.states:
                 old_value = value[state]
-                # pi(a|s) = 0.25, p(s',r|s,a) = 1
-                value[state] = 0.25*sum(r+gamma*value[ns] for (s, a), (ns, r) in env.model.items() if s == state)
+                # p(s',r|s,a) = 1
+                (next_state, reward) = env.model[state, policy[state]]
+                value[state] = reward+gamma*value[next_state]
                 delta = max(delta, abs(old_value-value[state]))
             if delta < theta:
                 break
@@ -24,7 +26,7 @@ def policy_iteration(env, gamma=0.9, theta=0.0001):
         # Improve policy
         for state in env.states:
             old_action = policy[state]
-            policy[state] argmax({a: r+gamma*value[ns] for (s, a), (ns, r) in env.model.items() if s == state})
+            policy[state] = argmax({a: r+gamma*value[ns] for (s, a), (ns, r) in env.model.items() if s == state})
 
             policy_stable = (old_action == policy[state])
             if not policy_stable:
