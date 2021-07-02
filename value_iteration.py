@@ -1,7 +1,8 @@
 import environments
 
+argmax = lambda d: max(d, key=d.get)
+
 def value_iteration(env, gamma=0.9, theta=0.0001):
-    argmax = lambda d: max(d, key=d.get)
     value = {s: 0 for s in env.states}
     policy = {s: 0 for s in env.states}
     n = 0
@@ -11,8 +12,8 @@ def value_iteration(env, gamma=0.9, theta=0.0001):
         delta = 0
         for state in env.states:
             old_value = value[state]
-            # pi(a|s) = 0.25, p(s',r|s,a) = 1
-            value[state] = 0.25*sum(r + gamma*value[ns] for (s, _), (ns, r) in env.model.items() if s == state)
+            # p(s',r|s,a) = 1
+            value[state] = max(r+gamma*value[ns] for (s, _), (ns, r) in env.model.items() if s == state)
             delta = max(delta, abs(old_value-value[state]))
         if delta < theta:
             break
@@ -24,6 +25,8 @@ def value_iteration(env, gamma=0.9, theta=0.0001):
     print('Iterations: ', n)
     env.display(value)
     env.display(policy)
+
+    return policy
 
 env = environments.GridWorld()
 value_iteration(env)

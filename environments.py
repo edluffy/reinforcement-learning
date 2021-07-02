@@ -23,22 +23,17 @@ class GridWorld():
         self.rewards[(0, 0)] = 0
         self.rewards[(3, 3)] = 0
 
-        # Model of the environment
+        # 'P': state transition probability p(s',r|s,a)
+        self.prob = 0.1
+
+        # Deterministic model of the environment
+        delta = {'U': (0, -1), 'D': (0,  1), 'L': (-1, 0), 'R': (1,  0)}
         self.model = {} # {(state, action): (next_state, reward)}
         for s in self.states:
             for a in self.actions:
-                if a == 'U':
-                    ns = s if s[1] == 0 else (s[0], s[1]-1)
-                elif a == 'D':
-                    ns = s if s[1] == 3 else (s[0], s[1]+1)
-                elif a == 'L':
-                    ns = s if s[0] == 0 else (s[0]-1, s[1])
-                elif a == 'R':
-                    ns = s if s[0] == 3 else (s[0]+1, s[1])
-
-                if s == (0, 0) or s == (3, 3):
-                    ns = s
-
+                ns = (s[0]+delta[a][0], s[1]+delta[a][1])
+                ns = (max(ns[0], 0), max(ns[1], 0))
+                ns = (min(ns[0], 3), min(ns[1], 3))
                 self.model[(s, a)] = (ns, self.rewards[s])
 
     def terminal(self, state): # Check if in a terminal state
