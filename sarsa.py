@@ -3,38 +3,30 @@ import random
 
 argmax = lambda d: max(d, key=d.get)
 
-def sarsa(env, gamma=0.9, alpha=0.5, epsilon=0.1, ep=1000):
-    action_value = {(s, a): 0 for (s, a) in env.model.keys()}
+def sarsa(env, gamma=0.9, alpha=0.5, epsilon=0.1, ep=200):
+    Q = {(s, a): 0 for (s, a) in env.model.keys()}
 
-    def epsilon_greedy(state):
+    def epsilon_greedy(s):
         if random.random() > epsilon:
-            action = argmax({a: v for (s, a), v in action_value.items() if s == state})
+            return argmax({a: Q[(s, a)] for a in env.actions})
         else:
-            action = random.choice(env.actions)
-        return action
+            return random.choice(env.actions)
 
     for _ in range(ep):
-        state = random.choice(env.states)
-        action = epsilon_greedy(state)
+        s = random.choice(env.states)
+        a = epsilon_greedy(s)
 
-        while not env.terminal(state):
-            (next_state, reward) = env.model[(state, action)]
-            next_action = epsilon_greedy(next_state)
-
-            td_target = reward + gamma*action_value[(next_state, next_action)]
-            td_error = td_target - action_value[(state, action)]
-            action_value[(state, action)] += alpha*td_error
-
-            state = next_state
-            action = next_action
+        while not env.terminal(s):
+            (ns, r) = env.model[(s, a)]
+            na = epsilon_greedy(ns)
+            Q[(s, a)] += alpha*(r + gamma*Q[(ns, na)] - Q[(s, a)])
+            s = ns; a = na
 
     # Extract optimal state-value function + optimal policy
-    policy = {}
-    value = {}
-    for state in env.states:
-        policy[state] = argmax({a: v for (s, a), v in action_value.items() if s == state})
-        value[state] = max(v for (s, _), v in action_value.items() if s == state)
-    env.display(value)
+    V = {s: max(Q[(s, a)] for a in env.actions) for s in env.states}
+    policy = {s: argmax({a: Q[(s, a)] for a in env.actions}) for s in env.states}
+
+    env.display(V)
     env.display(policy)
 
 env = environments.GridWorld()
