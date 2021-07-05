@@ -27,8 +27,6 @@ def monte_carlo(env, gamma=0.9, alpha=0.5, epsilon=0.1, ep=1000):
             Q[(s, a)] += alpha*(G-Q[(s, a)])
             policy[s] = argmax({a: Q[(s, a)] for a in env.actions})
 
-
-
     V = {s: max(Q[(s, a)] for a in env.actions) for s in env.states}
 
     env.display(V)
