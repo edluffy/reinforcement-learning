@@ -3,44 +3,38 @@ import random
 
 argmax = lambda d: max(d, key=d.get)
 
-# Every-visit Monte Carlo policy evaluation with incremental updates to value function
-def monte_carlo(env, policy, gamma=0.9, alpha=None, ep=500):
-    value =  {s: 0 for s in env.states}
-    counter = {s: 0 for s in env.states}
-    returns = {s: [] for s in env.states}
+# Every-visit Monte Carlo evaluation with incremental updates to action-value function
+def monte_carlo(env, gamma=0.9, alpha=0.5, epsilon=0.1, ep=1000):
+    Q = {(s, a): 0 for (s, a) in env.model.keys()}
+    policy = {s: random.choice(env.actions) for s in env.states}
 
-    for i in range(ep):
+    for _ in range(ep):
         # Generate episode
         episode = [] # MRP: [(s0, a0, r1), (s1, a1, r2),...]
         s = random.choice(env.states)
-        while True:
-            a = policy[s]
+        while not env.terminal(s):
+            # epsilon greedy
+            a = policy[s] if random.random() > epsilon else random.choice(env.actions)
+
             (ns, r) = env.model[(s, a)]
             episode.append((s, a, r))
-
-            if env.terminal(s): break
             s = ns
 
         # Back-sample through episode
-        ret = 0
-        for (state, action, reward) in reversed(episode):
-            # Check if first occurence
-            ret = gamma*ret + reward
-            if alpha:
-                value[state] += alpha*(ret-value[state])
-            else:
-                counter[state] = counter[state]+1
-                value[state] += (1/counter[state])*(ret-value[state])
+        G = 0
+        for (s, a, r) in reversed(episode):
+            G = gamma*G + r
+            Q[(s, a)] += alpha*(G-Q[(s, a)])
+            policy[s] = argmax({a: Q[(s, a)] for a in env.actions})
 
-    env.display(value)
 
-# Evaluation of optimal policy
-policy = {(0, 0): 'U', (1, 0): 'L', (2, 0): 'L', (3, 0): 'D',
-          (0, 1): 'U', (1, 1): 'U', (2, 1): 'U', (3, 1): 'D',
-          (0, 2): 'U', (1, 2): 'U', (2, 2): 'D', (3, 2): 'D',
-          (0, 3): 'U', (1, 3): 'R', (2, 3): 'R', (3, 3): 'D'}
+
+    V = {s: max(Q[(s, a)] for a in env.actions) for s in env.states}
+
+    env.display(V)
+    env.display(policy)
 
 env = environments.GridWorld()
-monte_carlo(env, policy, gamma=0.9)
+monte_carlo(env)
 
 
