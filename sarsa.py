@@ -15,7 +15,6 @@ def sarsa(env, gamma=0.9, alpha=0.5, epsilon=0.1, ep=200):
     for _ in range(ep):
         s = random.choice(env.states)
         a = epsilon_greedy(s)
-
         while not env.terminal(s):
             (ns, r) = env.model[(s, a)]
             na = epsilon_greedy(ns)

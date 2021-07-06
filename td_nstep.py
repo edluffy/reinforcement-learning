@@ -2,7 +2,7 @@ import environments
 import random
 
 def td_nstep(env, policy, n=0, gamma=0.9, alpha=None, ep=100):
-    value = {s: 0 for s in env.states}
+    V = {s: 0 for s in env.states}
     counter = {s: 0 for s in env.states}
 
     for i in range(ep):
@@ -21,7 +21,7 @@ def td_nstep(env, policy, n=0, gamma=0.9, alpha=None, ep=100):
                     T = t+1
                 s = ns
 
-            # Update value estimate for state at time tau
+            # Update V estimate for state at time tau
             tau = t-n-1
             if tau >= 0:
                 td_target = 0
@@ -30,17 +30,17 @@ def td_nstep(env, policy, n=0, gamma=0.9, alpha=None, ep=100):
                     td_target += gamma**i * reward
 
                 if tau+n+1 < T:
-                    td_target += gamma**(n+1) * value[episode[tau+n+1][0]]
+                    td_target += gamma**(n+1) * V[episode[tau+n+1][0]]
 
                 state = episode[tau][0]
                 counter[state] += 1
-                td_error = td_target - value[state]
-                value[state] += (1/counter[state])*(td_error)
+                td_error = td_target - V[state]
+                V[state] += (1/counter[state])*(td_error)
 
             if tau == T-1: break
             t+=1
 
-    env.display(value)
+    env.display(V)
 
 # Evaluation of optimal policy
 policy = {(0, 0): 'U', (1, 0): 'L', (2, 0): 'L', (3, 0): 'D',
