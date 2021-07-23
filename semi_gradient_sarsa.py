@@ -22,7 +22,7 @@ def semi_gradient_sarsa(env, gamma=0.9, alpha=0.1, epsilon=0.1, ep=30000):
 
         t = 0
         while True:
-            #env.render()
+            env.render()
 
             #obs, reward, done, _ = env.step(action)
             features = obs

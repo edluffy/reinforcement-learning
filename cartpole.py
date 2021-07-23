@@ -30,7 +30,7 @@ def reinforce(env, gamma=0.9, alpha_min=0.1, epsilon_min=0.1, ep=20000):
         # Generate episode
         episode = [] # MRP: [(s0, a0, r1), (s1, a1, r2),...]
         for t in range(99999):
-            #env.render()
+            env.render()
 
             # epsilon greedy
             if np.random.random() > epsilon[n]:

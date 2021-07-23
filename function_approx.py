@@ -5,7 +5,9 @@ argmax = lambda d: max(d, key=d.get)
 
 def vfa_monte_carlo(env, gamma=0.9, alpha=0.1, ep=10):
     obs = env.reset()
-    w = np.random.random(5)
+    w = np.zeros((2, 4))
+
+    alpha = np.linspace(0.1, 0.01, ep)
 
     # Generate episode
     episode = [] # [(x0, a0, r1), (x1, a1, r2),...]
@@ -23,18 +25,19 @@ def vfa_monte_carlo(env, gamma=0.9, alpha=0.1, ep=10):
         #        x: feature vector for current state and action
         G = 0
         for (obs, action, reward) in reversed(episode):
-            x = np.append(obs, action)
+            x = obs
             G = gamma*G + reward
-            Q_approx = np.dot(x, w)
-            w += alpha*(G-Q_approx)*x
+            Q_approx = x @ w[action]
+            w[action] += alpha[n]*(G-Q_approx)*x
         #print('MSE:', (G-Q_approx)**2)
-    print(w)
+        #print(w[0]+w[1])
+        #print(w)
 
-    for n in range(1):
+    for n in range(ep):
         for t in range(100000):
             env.render()
-            action = argmax({a: np.dot(np.append(obs, a), w) for a in [0, 1]})
 
+            action = argmax({a: obs @ w[a] for a in [0, 1]})
             obs, reward, done, _ = env.step(action)
 
             if done:
@@ -48,5 +51,5 @@ def vfa_monte_carlo(env, gamma=0.9, alpha=0.1, ep=10):
 
 env = gym.make("CartPole-v1")
 for _ in range(10):
-    vfa_monte_carlo(env, ep=200)
+    vfa_monte_carlo(env, ep=1000)
 
